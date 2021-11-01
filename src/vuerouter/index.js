@@ -20,7 +20,9 @@ export default class VueRouter {
 
     _Vue.mixin({
       beforeCreate () {
+        console.log(this)
         if (this.$options.router) {
+          console.log('实例')
           _Vue.prototype.$router = this.$options.router
           this.$options.router.init()
         }
@@ -33,6 +35,7 @@ export default class VueRouter {
     this.data = _Vue.observable({
       current: '/'
     })
+    this.mode = options.mode
   }
 
   init () {
