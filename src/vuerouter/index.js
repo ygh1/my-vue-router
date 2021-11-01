@@ -32,10 +32,12 @@ export default class VueRouter {
   constructor (options) {
     this.options = options
     this.routerMap = {}
-    this.data = _Vue.observable({
-      current: '/'
-    })
     this.mode = options.mode
+    const current = this.mode === 'history'? window.location.pathname : window.location.hash.replace('#', '')
+    this.data = _Vue.observable({
+      current
+    })
+    
   }
 
   init () {
@@ -68,8 +70,14 @@ export default class VueRouter {
       },
       methods: {
         clickHandler (e) {
-          history.pushState(null, '', this.to)
-          this.$router.data.current = this.to
+          const mode = this.$router.mode
+          if (mode === 'history') {
+            history.pushState(null, '', this.to)
+            this.$router.data.current = this.to
+          } else if (mode === 'hash') {
+            location.href = '/#' + this.to
+          }
+          
           e.preventDefault()
         }
       }
@@ -84,8 +92,19 @@ export default class VueRouter {
   }
 
   initEvent () {
-    window.addEventListener('popstate', () => {
-      this.data.current = window.location.pathname
-    })
+    if (this.mode === 'history') {
+      window.addEventListener('popstate', () => {
+        this.data.current = window.location.pathname
+      })
+    } else if (this.mode === 'hash') {
+      window.addEventListener('hashchange', () => {
+        const path = window.location.hash.replace('#', '')
+        this.data.current = path
+      })
+    }
+  }
+
+  afterEach(cb) {
+    console.log(cb)
   }
 }
